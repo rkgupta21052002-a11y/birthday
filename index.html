@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>🎉 Surprise! 🎂</title>
+  <style>
+    :root {
+      --bg: #0f1020;
+      --card: #16172a;
+      --text: #eef1ff;
+      --accent: #8b5cf6;
+      --accent2: #22c55e;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+      color: var(--text);
+      background: radial-gradient(1200px 600px at 80% -20%, #1b1d38, #0f1020 60%),
+                  radial-gradient(1000px 800px at -10% 50%, #10122a, #0f1020 60%);
+      overflow-x: hidden;
+    }
+    a { color: inherit; }
+    .container { max-width: 960px; margin: 0 auto; padding: 24px; }
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+      border: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08);
+      border-radius: 20px;
+      backdrop-filter: blur(6px);
+      padding: 22px;
+    }
+    .title { font-size: clamp(28px, 4vw, 44px); font-weight: 800; letter-spacing: 0.5px; margin: 0 0 12px; }
+    .muted { color: #c7c9e5; opacity: 0.8; }
+    .row { display: grid; grid-template-columns: 1fr; gap: 14px; }
+    @media (min-width: 720px) { .row-2 { grid-template-columns: 1fr 1fr; } }
+    label { font-weight: 600; font-size: 14px; opacity: 0.9; }
+    input, textarea, select {
+      width: 100%;
+      background: #0f1126;
+      border: 1px solid rgba(255,255,255,0.12);
+      color: var(--text);
+      border-radius: 12px;
+      padding: 12px 14px;
+      outline: none;
+      transition: border 180ms ease;
+    }
+    input:focus, textarea:focus, select:focus { border-color: var(--accent); }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+      background: linear-gradient(90deg, var(--accent), #06b6d4);
+      color: white; border: none; font-weight: 700; letter-spacing: 0.3px;
+      padding: 12px 16px; border-radius: 14px; cursor: pointer;
+      box-shadow: 0 10px 30px rgba(139,92,246,0.3);
+    }
+    .btn.secondary { background: linear-gradient(90deg, #334155, #0f172a); box-shadow: none; }
+    .btn.warning { background: linear-gradient(90deg, var(--warning), #f97316); }
+    .btn.danger { background: linear-gradient(90deg, var(--danger), #f43f5e); }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+
+    .hidden { display: none !important; }
+    .center { text-align: center; }
+    .hero {
+      display: grid; place-items: center; min-height: 75vh; text-align: center;
+      padding: 18px; position: relative; overflow: hidden;
+    }
+    .badge { display: inline-block; font-size: 12px; opacity: 0.8; border: 1px dashed rgba(255,255,255,0.3); padding: 6px 10px; border-radius: 999px; }
+    .name { font-size: clamp(36px, 6vw, 66px); font-weight: 900; line-height: 1.05; margin: 8px 0; }
+
+    .avatar {
+      width: 140px; height: 140px; border-radius: 999px; overflow: hidden; border: 3px solid rgba(255,255,255,0.35); box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      transform: translateZ(0);
+    }
+    .avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+    .floating { position: absolute; inset: 0; pointer-events: none; }
+    .balloon { position: absolute; width: 28px; height: 36px; border-radius: 50% 50% 45% 45%; background: var(--accent); animation: floatUp linear forwards; opacity: 0.95; }
+    .balloon:after { content: ""; position: absolute; left: 50%; transform: translateX(-50%); bottom: -14px; width: 2px; height: 18px; background: rgba(255,255,255,0.5); }
+    @keyframes floatUp { from { transform: translateY(20vh) scale(0.8); opacity: 0; } to { transform: translateY(-100vh) scale(1.2); opacity: 1; } }
+
+    .type { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; opacity: 0.9; min-height: 2.2em; }
+
+    .gift-btn { font-size: clamp(18px, 2.5vw, 22px); padding: 14px 22px; }
+
+    .progresswrap { width: 100%; background: rgba(255,255,255,0.06); border-radius: 999px; overflow: hidden; height: 12px; border: 1px solid rgba(255,255,255,0.12); }
+    .progressbar { height: 100%; width: 0%; background: linear-gradient(90deg, var(--warning), #f43f5e); transition: width 200ms ease; }
+
+    .popup { position: fixed; inset: 0; display: grid; place-items: center; background: rgba(0,0,0,0.75); backdrop-filter: blur(3px); }
+    .popup .box { background: #0b0d1c; border: 1px solid rgba(255,255,255,0.15); padding: 18px; border-radius: 14px; max-width: 520px; width: 92%; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+
+    canvas#confetti { position: fixed; inset: 0; pointer-events: none; }
+
+    .footnote { opacity: 0.7; font-size: 12px; margin-top: 10px; }
+    .sm { font-size: 12px; opacity: 0.85; }
+    .linklike { text-decoration: underline; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <canvas id="confetti"></canvas>
+  <div class="container">
+    <!-- SETUP PANEL (shows when no query params) -->
+    <section id="setup" class="card">
+      <h1 class="title">🎂 Surprise Birthday Link Builder</h1>
+      <p class="muted">Create a hilarious surprise page that ends with a redirect. Share the generated link with the birthday star!</p>
+      <div class="row row-2" style="margin-top: 12px;">
+        <div>
+          <label>Birthday person's name</label>
+          <input id="nameInput" placeholder="e.g., Rahul" />
+        </div>
+        <div>
+          <label>Funny pre-redirect message</label>
+          <input id="msgInput" placeholder="e.g., Claim your unlimited biryani coupon 😜" />
+        </div>
+        <div>
+          <label>Photo URL (optional)</label>
+          <input id="imgInput" placeholder="Paste image URL (JPG/PNG/GIF)" />
+        </div>
+        <div>
+          <label>Final redirect URL</label>
+          <input id="redirInput" placeholder="https://your-surprise-destination.example" />
+        </div>
+        <div>
+          <label>Delay before redirect (seconds)</label>
+          <input id="delayInput" type="number" min="2" value="10" />
+        </div>
+        <div>
+          <label>Prank style</label>
+          <select id="styleInput">
+            <option value="party">Confetti & Balloons (safe + funny)</option>
+            <option value="update">Fake System Update → Surprise</option>
+            <option value="buffer">Endless Buffering → Boom!</option>
+          </select>
+        </div>
+      </div>
+      <div class="toolbar">
+        <button class="btn" id="generateBtn">Generate prank link</button>
+        <button class="btn secondary" id="testBtn" title="Opens the prank here for testing">Preview prank</button>
+        <button class="btn warning" id="downloadBtn" title="Saves a copy with your settings embedded">Download single-file page</button>
+      </div>
+      <p class="footnote">Tip: For the photo, paste any public image link (Google Photos direct link, Imgur, etc.).</p>
+    </section>
+
+    <!-- PRANK EXPERIENCE (shows when query params present) -->
+    <section id="prank" class="hero hidden">
+      <div class="floating" id="balloons"></div>
+      <div class="center">
+        <div class="avatar hidden" id="avatar"><img alt="avatar" id="avatarImg"></div>
+        <div class="badge" id="badge">Initializing surprise…</div>
+        <h1 class="name" id="headline">Hang tight…</h1>
+        <p class="type" id="typed"></p>
+
+        <div id="progressWrap" class="progresswrap hidden" style="margin:16px auto; max-width: 500px;">
+          <div id="progressBar" class="progressbar"></div>
+        </div>
+
+        <div class="toolbar center" style="justify-content:center; margin-top: 20px;">
+          <button class="btn gift-btn hidden" id="giftBtn">🎁 Open your birthday gift</button>
+        </div>
+        <p class="sm muted" id="countdown"></p>
+      </div>
+    </section>
+  </div>
+
+  <!-- POPUP for copy link -->
+  <div id="linkPopup" class="popup hidden">
+    <div class="box">
+      <h3 style="margin: 0 0 8px;">Your prank link is ready 🎯</h3>
+      <input id="linkOut" readonly>
+      <div class="toolbar" style="margin-top: 10px;">
+        <button class="btn" id="copyBtn">Copy link</button>
+        <button class="btn secondary" id="closePopup">Close</button>
+      </div>
+      <p class="footnote">Send this link to the birthday person. Opening it will launch the prank and then redirect.</p>
+    </div>
+  </div>
+
+  <script>
+    // --- Helpers
+    const $ = (q) => document.querySelector(q);
+    const params = new URLSearchParams(location.search);
+
+    function buildURLFromForm(embed = false) {
+      const name = $('#nameInput').value.trim();
+      const msg = $('#msgInput').value.trim();
+      const img = $('#imgInput').value.trim();
+      const redir = $('#redirInput').value.trim();
+      const delay = Math.max(2, parseInt($('#delayInput').value || '10', 10));
+      const style = $('#styleInput').value;
+
+      const u = new URL(location.href.split('?')[0]);
+      u.searchParams.set('name', name || 'Birthday Star');
+      if (msg) u.searchParams.set('msg', msg);
+      if (img && !embed) u.searchParams.set('img', img);
+      if (redir) u.searchParams.set('redirect', redir);
+      u.searchParams.set('delay', String(delay));
+      u.searchParams.set('style', style);
+      return u.toString();
+    }
+
+    function showPopup(url){
+      $('#linkOut').value = url;
+      $('#linkPopup').classList.remove('hidden');
+      $('#linkOut').select();
+    }
+
+    // --- Confetti (tiny implementation)
+    const Confetti = (() => {
+      const cv = $('#confetti');
+      const cx = cv.getContext('2d');
+      let w, h, pieces = [], rafId;
+      const colors = ['#fca5a5','#fdba74','#fde68a','#86efac','#93c5fd','#c7d2fe','#f0abfc'];
+      function resize(){ w = cv.width = innerWidth; h = cv.height = innerHeight; }
+      function resetPiece(p){
+        p.x = Math.random()*w; p.y = -10 - Math.random()*h*0.2; p.r = 3 + Math.random()*5;
+        p.c = colors[(Math.random()*colors.length)|0]; p.vx = -1 + Math.random()*2; p.vy = 2 + Math.random()*2; p.spin = Math.random()*0.2; p.a = Math.random()*Math.PI*2;
+      }
+      function spawn(n){ for(let i=0;i<n;i++){ const p={}; resetPiece(p); pieces.push(p);} }
+      function step(){
+        cx.clearRect(0,0,w,h);
+        for(const p of pieces){
+          p.x += p.vx; p.y += p.vy; p.a += p.spin;
+          if(p.y > h+20) resetPiece(p);
+          cx.save();
+          cx.translate(p.x,p.y); cx.rotate(p.a);
+          cx.fillStyle = p.c; cx.fillRect(-p.r, -p.r, p.r*2, p.r*2*0.6);
+          cx.restore();
+        }
+        rafId = requestAnimationFrame(step);
+      }
+      function start(burst=120){ cancelAnimationFrame(rafId); pieces.length = 0; spawn(burst); resize(); step(); }
+      addEventListener('resize', resize);
+      resize();
+      return { start };
+    })();
+
+    // --- Balloons
+    function launchBalloons(){
+      const wrap = $('#balloons');
+      wrap.innerHTML = '';
+      const palette = ['#f43f5e','#f59e0b','#10b981','#3b82f6','#8b5cf6','#ec4899'];
+      for(let i=0;i<24;i++){
+        const b=document.createElement('div');
+        b.className='balloon';
+        const left = Math.random()*100; const dur = 7+Math.random()*6; const col = palette[(Math.random()*palette.length)|0];
+        b.style.left = left+'%';
+        b.style.bottom = '-20vh';
+        b.style.background = col;
+        b.style.animationDuration = dur+'s';
+        wrap.appendChild(b);
+      }
+    }
+
+    // --- Typewriter
+    async function typeLines(el, lines, speed=22){
+      el.textContent = '';
+      for(const line of lines){
+        for(let i=0;i<line.length;i++){
+          el.textContent += line[i];
+          await new Promise(r=>setTimeout(r, speed));
+        }
+        el.textContent += '\n';
+        await new Promise(r=>setTimeout(r, 400));
+      }
+    }
+
+    // --- Fake progress (for update/buffer styles)
+    function fakeProgress(to=100, dur=5000){
+      const bar = $('#progressBar');
+      const wrap = $('#progressWrap');
+      wrap.classList.remove('hidden');
+      bar.style.width = '0%';
+      const start = performance.now();
+      function tick(t){
+        const k = Math.min(1, (t-start)/dur);
+        const ease = 1 - Math.pow(1-k, 3);
+        bar.style.width = (ease*to).toFixed(1)+'%';
+        if(k<1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
+
+    // --- Mild prank sounds using WebAudio (no external files)
+    function toot(){
+      try {
+        const ctx = new (window.AudioContext||window.webkitAudioContext)();
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.type = 'square'; o.frequency.value = 440; g.gain.value = 0.0001; // start quiet
+        o.connect(g); g.connect(ctx.destination); o.start();
+        const t0 = ctx.currentTime;
+        g.gain.exponentialRampToValueAtTime(0.2, t0+0.02);
+        o.frequency.exponentialRampToValueAtTime(880, t0+0.15);
+        g.gain.exponentialRampToValueAtTime(0.0001, t0+0.4);
+        o.stop(t0+0.45);
+      } catch(e) {}
+    }
+
+    // --- PRANK FLOW
+    async function runPrank(){
+      const name = params.get('name') || 'Birthday Star';
+      const msg = params.get('msg') || 'Verifying your free lifetime cake subscription…';
+      const img = params.get('img') || '';
+      const redirect = params.get('redirect') || '';
+      const delaySec = Math.max(2, parseInt(params.get('delay')||'10',10));
+      const style = params.get('style') || 'party';
+
+      $('#setup').classList.add('hidden');
+      $('#prank').classList.remove('hidden');
+
+      $('#headline').textContent = style==='party' ? `Hey ${name}…` : 'Please wait…';
+      $('#badge').textContent = style==='update' ? 'Installing super secret birthday package…' : (style==='buffer' ? 'Buffering awesomeness…' : 'Authorizing birthday access…');
+
+      if(img){
+        const imgEl = $('#avatarImg');
+        imgEl.src = img; imgEl.onload = ()=> $('#avatar').classList.remove('hidden');
+      }
+
+      // Pre-scene per style
+      if(style==='update' || style==='buffer'){
+        fakeProgress(100, Math.min(9000, 2500 + delaySec*300));
+        await typeLines($('#typed'), [msg, 'Almost there…']);
+        await new Promise(r=>setTimeout(r, 1200));
+      } else {
+        await typeLines($('#typed'), [msg]);
+      }
+
+      // SURPRISE!
+      $('#badge').textContent = 'SURPRISE!';
+      $('#headline').textContent = `Happy Birthday, ${name}! 🎉`;
+      Confetti.start(200);
+      launchBalloons();
+      toot();
+
+      const giftBtn = $('#giftBtn');
+      giftBtn.classList.remove('hidden');
+      giftBtn.onclick = () => {
+        toot();
+        if(redirect){ location.href = redirect; }
+      };
+
+      // Auto-redirect countdown
+      let t = delaySec;
+      const cd = $('#countdown');
+      cd.textContent = redirect ? `Redirecting to your gift in ${t}s…` : '';
+      const timer = setInterval(()=>{
+        t--; if(t<=0){ clearInterval(timer); if(redirect){ location.href = redirect; } else { cd.textContent=''; } }
+        else cd.textContent = `Redirecting to your gift in ${t}s…`;
+      }, 1000);
+    }
+
+    // --- Setup mode handlers
+    $('#generateBtn').addEventListener('click', ()=>{
+      const url = buildURLFromForm(false);
+      showPopup(url);
+    });
+
+    $('#testBtn').addEventListener('click', ()=>{
+      const url = buildURLFromForm(false);
+      location.href = url;
+    });
+
+    $('#downloadBtn').addEventListener('click', ()=>{
+      // Build a standalone HTML with settings embedded as default params.
+      const url = new URL(buildURLFromForm(false));
+      const qs = url.search;
+      const blob = new Blob([document.documentElement.outerHTML.replace(location.search, qs)], {type: 'text/html'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'surprise-birthday.html';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(()=>URL.revokeObjectURL(a.href), 1500);
+    });
+
+    $('#copyBtn').addEventListener('click', async ()=>{
+      try { await navigator.clipboard.writeText($('#linkOut').value); $('#copyBtn').textContent = 'Copied! ✅'; setTimeout(()=>$('#copyBtn').textContent='Copy link', 1600); } catch(e) {}
+    });
+    $('#closePopup').addEventListener('click', ()=> $('#linkPopup').classList.add('hidden'));
+
+    // Decide mode
+    if(params.has('name') || params.has('redirect') || params.has('style')){
+      runPrank();
+    } else {
+      $('#setup').classList.remove('hidden');
+    }
+  </script>
+</body>
+</html>
